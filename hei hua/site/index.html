@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黑话翻译器 · AI / 计算机版</title>
+<style>
+  :root{
+    --bg:#f3f5fb; --card:#ffffff; --ink:#1f2433; --sub:#6b7280;
+    --line:#e7eaf3; --brand:#4f6bff; --brand2:#22c3d4;
+    --ai:#4f6bff; --ai-bg:#eef1ff;
+    --math:#d97706; --math-bg:#fef3e2;
+    --cs:#059669; --cs-bg:#e6f7f0;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 60px}
+
+  /* header */
+  header{text-align:center;padding:18px 0 22px}
+  .logo{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:30px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,var(--brand),var(--brand2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .logo .gear{font-size:28px;-webkit-text-fill-color:initial}
+  header p{color:var(--sub);font-size:14.5px;margin-top:8px}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+  .tab{
+    border:1px solid var(--line);background:#fff;color:var(--sub);
+    padding:8px 22px;border-radius:999px;font-size:14.5px;cursor:pointer;
+    transition:all .15s;font-weight:600;
+  }
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:22px;margin-bottom:16px;
+    box-shadow:0 2px 10px rgba(40,60,120,.04);
+  }
+
+  textarea{
+    width:100%;min-height:130px;resize:vertical;border:1.5px solid var(--line);
+    border-radius:12px;padding:14px;font-size:15.5px;font-family:inherit;
+    line-height:1.8;color:var(--ink);outline:none;transition:border-color .15s;
+  }
+  textarea:focus{border-color:var(--brand)}
+  .meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:8px}
+  .count{font-size:12.5px;color:var(--sub)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}
+  button.act{
+    border:none;border-radius:10px;padding:10px 22px;font-size:15px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:transform .1s,opacity .15s;
+  }
+  button.act:active{transform:scale(.97)}
+  .btn-primary{background:linear-gradient(120deg,var(--brand),#7a5cff);color:#fff}
+  .btn-ghost{background:#f1f3f9;color:var(--ink)}
+  .btn-small{padding:7px 14px;font-size:13px;border-radius:8px}
+
+  .examples{margin-top:14px}
+  .examples .lab{font-size:13px;color:var(--sub);margin-bottom:8px}
+  .chip{
+    display:inline-block;background:#f4f6fc;border:1px solid var(--line);
+    color:#44507a;font-size:13px;padding:6px 12px;border-radius:999px;
+    margin:0 8px 8px 0;cursor:pointer;transition:all .15s;
+  }
+  .chip:hover{border-color:var(--brand);color:var(--brand)}
+
+  .sec-title{font-size:16px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .sec-title .num{
+    font-size:12.5px;font-weight:600;color:var(--brand);
+    background:var(--ai-bg);padding:2px 10px;border-radius:999px;
+  }
+  .tip{font-size:12.5px;color:var(--sub);font-weight:400}
+
+  .sentence{
+    font-size:16px;line-height:2.1;padding:14px 16px;border-radius:12px;
+    background:#fafbfe;border:1px dashed var(--line);
+  }
+  .sentence mark{
+    background:#dbe3ff;color:#2f45b8;border-radius:5px;padding:0 4px;
+    font-weight:700;
+  }
+  .plain-box{background:#f1faf6;border:1px solid #cdeede;border-radius:12px;padding:16px}
+  .plain-text{font-size:16.5px;line-height:2.2;color:#173b2c}
+  .rp{
+    color:#0a7a52;font-weight:700;border-bottom:2px dashed #67c7a5;
+    cursor:help;padding:0 1px;
+  }
+  .bracket{color:#67c7a5;font-weight:700}
+
+  .term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:6px}
+  .term-card{
+    border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    background:#fff;transition:box-shadow .15s;
+  }
+  .term-card:hover{box-shadow:0 4px 14px rgba(40,60,120,.08)}
+  .term-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+  .term-name{font-size:15.5px;font-weight:800}
+  .term-en{font-size:12px;color:#9aa1b2;font-style:italic}
+  .badge{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .b-ai{background:var(--ai-bg);color:var(--ai)}
+  .b-math{background:var(--math-bg);color:var(--math)}
+  .b-cs{background:var(--cs-bg);color:var(--cs)}
+  .term-desc{font-size:13.5px;color:#454c5f;line-height:1.75}
+
+  .empty{color:var(--sub);font-size:14px;text-align:center;padding:26px 10px}
+  .empty b{color:var(--brand)}
+
+  /* glossary */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .toolbar input[type=text]{
+    flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:10px;
+    padding:10px 14px;font-size:14.5px;outline:none;font-family:inherit;
+  }
+  .toolbar input[type=text]:focus{border-color:var(--brand)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .filter{
+    border:1px solid var(--line);background:#fff;color:var(--sub);
+    padding:7px 16px;border-radius:999px;font-size:13.5px;cursor:pointer;font-weight:600;
+  }
+  .filter.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .glossary-count{font-size:13px;color:var(--sub);margin-bottom:12px}
+
+  footer{text-align:center;color:#9aa1b2;font-size:12.5px;margin-top:30px;line-height:1.9}
+  .hide{display:none}
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:10px 22px;border-radius:999px;
+    font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:99;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><span class="gear">🛠️</span>黑话翻译器</div>
+    <p>专治 AI / 计算机课堂黑话 —— 整句翻成大白话，专业名词逐个标注</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-view="translator">📖 翻译</button>
+    <button class="tab" data-view="glossary">📚 词库</button>
+  </div>
+
+  <!-- ========== 翻译视图 ========== -->
+  <section id="view-translator">
+    <div class="card">
+      <textarea id="input" placeholder="把老师课件、板书或教材里看不懂的那句话整段贴进来，例如：&#10;卷积神经网络通过反向传播算法不断优化模型参数，从而提升图像分类任务的准确率。"></textarea>
+      <div class="meta-row">
+        <span class="count" id="charCount">0 字</span>
+        <div class="btns">
+          <button class="act btn-ghost" id="clearBtn">清空</button>
+          <button class="act btn-primary" id="goBtn">翻译成大白话</button>
+        </div>
+      </div>
+      <div class="examples">
+        <div class="lab">不知道怎么用？点个例句试试 👇</div>
+        <span class="chip" data-ex="0">例句 1 · CNN 与反向传播</span>
+        <span class="chip" data-ex="1">例句 2 · 大语言模型与 Token</span>
+        <span class="chip" data-ex="2">例句 3 · 学习率与过拟合</span>
+      </div>
+    </div>
+
+    <div id="resultArea" class="hide">
+      <div class="card">
+        <div class="sec-title">📝 原句 <span class="tip">专业词已高亮</span></div>
+        <div class="sentence" id="origOut"></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title">💡 整句大白话
+          <span class="tip">「」里是把专业词替换成大白话后的说法</span>
+          <button class="act btn-ghost btn-small" id="copyBtn" style="margin-left:auto">复制</button>
+        </div>
+        <div class="plain-box"><div class="plain-text" id="plainOut"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title">🏷 专业名词标注 <span class="num" id="termNum">0 个</span></div>
+        <div class="term-grid" id="termCards"></div>
+      </div>
+    </div>
+
+    <div class="card" id="welcomeCard">
+      <div class="empty">把听不懂的句子贴到上面，点<b>「翻译成大白话」</b>，就能看到：<br>① 整句话的白话版 &nbsp; ② 每个专业词单独的解释标注</div>
+    </div>
+  </section>
+
+  <!-- ========== 词库视图 ========== -->
+  <section id="view-glossary" class="hide">
+    <div class="card">
+      <div class="toolbar">
+        <input type="text" id="glossSearch" placeholder="搜索词库，如：梯度、CNN、递归、API …">
+        <div class="filters">
+          <button class="filter active" data-cat="all">全部</button>
+          <button class="filter" data-cat="ai">人工智能</button>
+          <button class="filter" data-cat="math">数学基础</button>
+          <button class="filter" data-cat="cs">计算机通用</button>
+        </div>
+      </div>
+      <div class="glossary-count" id="glossCount"></div>
+      <div class="term-grid" id="glossList"></div>
+    </div>
+  </section>
+
+  <footer>
+    本工具在浏览器本地运行，无需联网 🔒<br>
+    遇到词库里还没有的词，把整句话发给你的 Agent，就能补充进词库
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 词库 =================
+   t: 术语 | a: 别名(英文缩写等) | en: 英文
+   cat: ai / math / cs | say: 白话替换短语(直接塞进句子) | d: 详细解释 */
+const GLOSSARY = [
+  /* ---------- 人工智能 ---------- */
+  {t:"人工智能", a:["AI"], en:"Artificial Intelligence", cat:"ai",
+   say:"让机器像人一样会看、会听、会思考、会学习的技术",
+   d:"让机器模仿人类的感知、思考和决策能力，能完成识别、对话、推理等通常需要人来做的任务。"},
+  {t:"机器学习", a:[], en:"Machine Learning", cat:"ai",
+   say:"让计算机自己从大量数据里总结规律",
+   d:"不靠程序员把规则一条条写死，而是给计算机大量数据，让它自己找规律、学会做判断。"},
+  {t:"深度学习", a:[], en:"Deep Learning", cat:"ai",
+   say:"用很多层「神经网络」自动学习规律的技术",
+   d:"机器学习的一个分支，用结构很深、层数很多的神经网络自动从数据里提取特征，是当前 AI 爆发的核心技术。"},
+  {t:"神经网络", a:[], en:"Neural Network", cat:"ai",
+   say:"一种模仿大脑神经元连接方式、一层层处理信息的计算模型",
+   d:"由大量人工神经元按层连接组成的数学模型，数据从输入层经过一层层计算，最后在输出层得到结果。"},
+  {t:"神经元", a:["节点"], en:"Neuron / Node", cat:"ai",
+   say:"神经网络里做一次简单计算的小单元",
+   d:"神经网络最基本的计算单位，接收上一层传来的数字，加权求和再经过激活函数，把结果传给下一层。"},
+  {t:"卷积神经网络", a:["CNN"], en:"Convolutional Neural Network", cat:"ai",
+   say:"一种特别擅长处理图片的神经网络",
+   d:"通过「卷积」小窗口在图像上滑动来提取边缘、纹理等局部特征，是图像识别、目标检测最常用的网络。"},
+  {t:"循环神经网络", a:["RNN"], en:"Recurrent Neural Network", cat:"ai",
+   say:"一种擅长处理有先后顺序的数据（比如句子）的神经网络",
+   d:"网络内部带有「记忆」，处理当前信息时会结合前面的信息，适合文本、语音、时间序列等有顺序的数据。"},
+  {t:"注意力机制", a:["Attention"], en:"Attention Mechanism", cat:"ai",
+   say:"让模型像人一样把注意力集中到重点内容上",
+   d:"模型在处理某个位置时，自动判断输入中哪些部分更重要、给它们更高权重，是 Transformer 和大模型的核心。"},
+  {t:"大语言模型", a:["LLM","LLMs"], en:"Large Language Model", cat:"ai",
+   say:"读了海量文字、学会理解和生成人话的 AI 模型",
+   d:"在海量文本上训练的超大规模模型，能理解语言并生成回答、写作、翻译等，ChatGPT、DeepSeek 都属于大语言模型。"},
+  {t:"生成式人工智能", a:["AIGC"], en:"Generative AI", cat:"ai",
+   say:"能自己生成文字、图片、声音等新内容的 AI",
+   d:"不只做分类和判断，而是根据提示创造出新内容，比如写文章、画图、生成音乐和视频。"},
+  {t:"自然语言处理", a:["NLP"], en:"Natural Language Processing", cat:"ai",
+   say:"让计算机听懂、读懂、写出人类语言的技术",
+   d:"研究人与计算机之间用自然语言沟通的技术，包括分词、机器翻译、问答系统、文本生成等方向。"},
+  {t:"计算机视觉", a:["CV"], en:"Computer Vision", cat:"ai",
+   say:"让计算机「看懂」图片和视频的技术",
+   d:"让摄像头和计算机代替人眼和大脑，完成图像分类、人脸识别、目标检测、自动驾驶感知等任务。"},
+  {t:"语音识别", a:[], en:"Speech Recognition", cat:"ai",
+   say:"让计算机把人说的话转成文字",
+   d:"把语音信号自动转换成对应文字的技术，手机语音输入、智能音箱背后都是它。"},
+  {t:"智能体", a:["Agent"], en:"AI Agent", cat:"ai",
+   say:"能自己规划、调用工具、一步步完成任务的 AI",
+   d:"不只回答问题，还能自主拆解目标、调用搜索/代码等工具、连续执行直到完成任务的智能程序。"},
+  {t:"多模态", a:[], en:"Multimodal", cat:"ai",
+   say:"能同时处理文字、图片、声音等多种形式的信息",
+   d:"「模态」指信息的形式。多模态模型可以同时看懂图、听懂话、读文字并互相关联起来理解。"},
+  {t:"模型", a:[], en:"Model", cat:"ai",
+   say:"用数据训练出来、能完成特定任务的一套「程序」",
+   d:"用算法和数据训练得到的成果，内部是大量参数，输入新数据就能输出判断或预测结果。"},
+  {t:"大模型", a:[], en:"Large Model / Foundation Model", cat:"ai",
+   say:"参数规模特别大、什么都能聊一点的 AI 模型",
+   d:"参数达到几十上百亿甚至更多的模型，能力泛、通用性强，可以在一个模型上做各种不同任务。"},
+  {t:"训练", a:[], en:"Training", cat:"ai",
+   say:"让模型反复看数据、不断自我调整的学习过程",
+   d:"把数据喂给模型，根据它每次答错的程度调整参数，反复多轮，直到模型表现足够好。"},
+  {t:"推理", a:["inference"], en:"Inference", cat:"ai",
+   say:"训练好的模型拿新数据实际去做判断",
+   d:"模型训练完成后进入使用阶段，对没见过的新输入计算出结果，这个过程叫推理（也叫推断）。"},
+  {t:"预测", a:[], en:"Prediction", cat:"ai",
+   say:"模型对新数据给出答案",
+   d:"训练好的模型根据输入估计未知结果，比如判断邮件是不是垃圾邮件、预测明天的气温。"},
+  {t:"数据集", a:[], en:"Dataset", cat:"ai",
+   say:"收集起来给模型学习和考试用的一堆数据",
+   d:"按一定结构整理的数据集合，比如几十万张带标注的图片、几万条聊天记录，是机器学习的「原材料」。"},
+  {t:"训练集", a:[], en:"Training Set", cat:"ai",
+   say:"专门给模型「做练习题」用的数据",
+   d:"训练过程中模型能看到、用来调整参数的那部分数据，相当于平时的课本和练习题。"},
+  {t:"验证集", a:[], en:"Validation Set", cat:"ai",
+   say:"训练中途用来「模考」的数据",
+   d:"训练中不参与调参，用来检验阶段性效果、帮助选择超参数，相当于模拟考试。"},
+  {t:"测试集", a:[], en:"Test Set", cat:"ai",
+   say:"最后用来「期末考试」的数据",
+   d:"训练全程都不碰的数据，训练结束后用它评估模型对全新数据的真实水平。"},
+  {t:"标签", a:[], en:"Label", cat:"ai",
+   say:"每条数据附带的正确答案",
+   d:"监督学习中给数据标注的答案，比如图片旁边写明「猫」、邮件旁边标明「垃圾邮件」。"},
+  {t:"监督学习", a:[], en:"Supervised Learning", cat:"ai",
+   say:"用带标准答案的题让模型照着学",
+   d:"训练数据每条都带正确答案（标签），模型根据自己的答案和标准答案的差距来学习。"},
+  {t:"无监督学习", a:[], en:"Unsupervised Learning", cat:"ai",
+   say:"不给答案，让模型自己从数据里找规律",
+   d:"数据没有标签，模型自己发现数据的结构，比如自动把相似用户分群、发现异常数据。"},
+  {t:"强化学习", a:[], en:"Reinforcement Learning", cat:"ai",
+   say:"靠「做对给奖励、做错给惩罚」反复试错来学习",
+   d:"智能体在环境中采取行动，根据奖励或惩罚不断调整策略，AlphaGo、机器人控制都用它。"},
+  {t:"分类", a:[], en:"Classification", cat:"ai",
+   say:"判断东西属于哪一类（比如猫还是狗）",
+   d:"模型的输出是离散类别，如垃圾邮件/正常邮件、阳性/阴性、图片里是猫还是狗。"},
+  {t:"回归", a:[], en:"Regression", cat:"ai",
+   say:"预测一个具体数字（比如房价、气温）",
+   d:"模型输出连续数值的任务，如根据面积、地段预测房价，根据历史数据预测销量。"},
+  {t:"聚类", a:[], en:"Clustering", cat:"ai",
+   say:"不给类别，让模型自动把相似的数据分成一堆一堆",
+   d:"无监督学习任务，按数据的相似程度自动分组，常用于用户分群、新闻归类、图像压缩。"},
+  {t:"特征", a:[], en:"Feature", cat:"ai",
+   say:"从原始数据里挑出来的、对判断有用的信息",
+   d:"模型实际用来做判断的输入信息，比如预测房价时的面积、楼层、地段，都是特征。"},
+  {t:"特征工程", a:[], en:"Feature Engineering", cat:"ai",
+   say:"人工琢磨「给模型看哪些信息更有用」的工作",
+   d:"利用领域知识从原始数据中提取、变换、筛选特征，往往直接决定模型效果的上限。"},
+  {t:"算法", a:[], en:"Algorithm", cat:"ai",
+   say:"解决一类问题的固定步骤和方法",
+   d:"为解决某个问题设计的一系列明确、有限的计算步骤，程序就是算法的具体实现。"},
+  {t:"参数", a:[], en:"Parameter", cat:"ai",
+   say:"模型内部可以自动调整的无数个数字",
+   d:"模型在训练中不断修改的内部数值，训练的本质就是找到一组合适的参数。"},
+  {t:"权重", a:[], en:"Weight", cat:"ai",
+   say:"模型内部决定每个输入有多重要的数字",
+   d:"每个输入连接上的系数，权重大说明这个输入对结果影响大，权重本质上就是模型参数。"},
+  {t:"偏置", a:["bias"], en:"Bias", cat:"ai",
+   say:"打分时的「基础分」",
+   d:"参数的一种，让神经元即使输入全为 0 时也能有输出，相当于线性方程 y=ax+b 里的 b。"},
+  {t:"超参数", a:[], en:"Hyperparameter", cat:"ai",
+   say:"训练之前人为设定的「旋钮」",
+   d:"不是模型自己学出来的，而是人在训练前设置的，比如学习率、训练轮数、批次大小。"},
+  {t:"损失函数", a:[], en:"Loss Function", cat:"ai",
+   say:"给模型错误程度打分的公式",
+   d:"衡量模型预测值和真实答案差距的函数，差距越大损失越大，训练就是让损失尽量小。"},
+  {t:"损失值", a:["loss","Loss"], en:"Loss", cat:"ai",
+   say:"模型这次错得有多离谱的分数（越小越好）",
+   d:"损失函数算出来的具体数值。训练时盯着它一路下降，就说明模型在变好。"},
+  {t:"优化器", a:["optimizer"], en:"Optimizer", cat:"ai",
+   say:"负责按错误分数调整参数的「教练」",
+   d:"根据梯度具体执行参数更新的算法，常见的有 SGD、Adam 等。"},
+  {t:"梯度下降", a:[], en:"Gradient Descent", cat:"ai",
+   say:"顺着错误下降最快的坡一步步往下走",
+   d:"最常用的优化方法：计算损失相对参数的梯度，沿梯度反方向小步更新参数，直到找到最低点。"},
+  {t:"梯度", a:[], en:"Gradient", cat:"ai",
+   say:"错误分数随参数变化的「坡度和方向」",
+   d:"一个向量，指向函数增长最快的方向；往它的反方向走，损失下降最快。"},
+  {t:"反向传播", a:["backprop","Backpropagation"], en:"Backpropagation", cat:"ai",
+   say:"把错误从最后一层一层层往回传，好算出每个参数该怎么改",
+   d:"训练神经网络的核心算法：先前向算出误差，再用链式法则把误差从输出层逐层传回，算出每个参数的梯度。"},
+  {t:"前向传播", a:[], en:"Forward Propagation", cat:"ai",
+   say:"数据从输入层一层层往后算、得出答案",
+   d:"输入数据按网络结构从前往后逐层计算，最终得到预测结果的过程。"},
+  {t:"学习率", a:[], en:"Learning Rate", cat:"ai",
+   say:"每次修改参数时迈的步子大小",
+   d:"控制参数每次更新幅度的超参数。太大容易震荡甚至越走越偏，太小学得太慢。"},
+  {t:"迭代", a:[], en:"Iteration", cat:"ai",
+   say:"反复调整、一轮一轮改进",
+   d:"每用一批数据更新一次参数就叫一次迭代，训练就是成千上万次迭代的累积。"},
+  {t:"轮次", a:["epoch","Epoch"], en:"Epoch", cat:"ai",
+   say:"把全部训练数据完整学一遍",
+   d:"所有训练数据都被模型完整学习过一遍叫一个 epoch，训练通常要跑几十上百个 epoch。"},
+  {t:"批次", a:["batch","Batch"], en:"Batch", cat:"ai",
+   say:"把数据分成一小批一小批喂给模型",
+   d:"数据太多无法一次全部计算，分成若干小批，每批做一次参数更新；每批的大小叫 batch size。"},
+  {t:"过拟合", a:[], en:"Overfitting", cat:"ai",
+   say:"模型把训练题死记硬背了，一换新题就不会",
+   d:"模型把训练数据的噪声和细节都背下来，训练分很高但在新数据上表现很差，泛化能力弱。"},
+  {t:"欠拟合", a:[], en:"Underfitting", cat:"ai",
+   say:"学得太浅，连练习题都没弄明白",
+   d:"模型太简单或训练不足，连训练数据上的规律都没学到，训练和测试表现都差。"},
+  {t:"泛化能力", a:[], en:"Generalization", cat:"ai",
+   say:"模型对没见过的新数据的适应能力",
+   d:"模型在训练集之外的新数据上的表现。机器学习真正追求的是泛化能力强，而不是只在训练题上考高分。"},
+  {t:"正则化", a:[], en:"Regularization", cat:"ai",
+   say:"防止模型死记硬背的约束手段",
+   d:"在损失函数中额外加惩罚项，限制参数过大，让模型更简单平滑，从而缓解过拟合，常见 L1、L2。"},
+  {t:"随机失活", a:["dropout","Dropout"], en:"Dropout", cat:"ai",
+   say:"训练时随机关掉一些神经元",
+   d:"训练时随机让一部分神经元暂时不参与计算，迫使网络不依赖个别神经元，是常用的防过拟合手段。"},
+  {t:"准确率", a:["accuracy","Accuracy"], en:"Accuracy", cat:"ai",
+   say:"模型全部回答中答对的比例",
+   d:"正确预测数占总样本数的比例，是最直观的分类指标，但类别不均衡时会有误导。"},
+  {t:"精确率", a:["precision","Precision"], en:"Precision", cat:"ai",
+   say:"模型说是的那些里，有多少真是的",
+   d:"预测为正的样本中真正为正的比例。比如筛垃圾邮件时，拦下来的邮件里真垃圾的占比。"},
+  {t:"召回率", a:["recall","Recall"], en:"Recall", cat:"ai",
+   say:"所有真的里面，模型找出来了多少",
+   d:"真正为正的样本中被成功找出来的比例。比如癌症筛查中，真实患者被查出的比例，漏诊要少。"},
+  {t:"混淆矩阵", a:[], en:"Confusion Matrix", cat:"ai",
+   say:"一张统计各类对错情况的表",
+   d:"把预测结果按「真正/预测」两两组合列成表格（真正例、假正例、真反例、假反例），直观看出错在哪。"},
+  {t:"微调", a:["fine-tuning","Fine-tuning"], en:"Fine-tuning", cat:"ai",
+   say:"在已经训练好的模型上用专门数据再调教",
+   d:"不从头训练，而是拿别人预训练好的模型，用自己领域的小数据继续训练，省钱又出效果。"},
+  {t:"预训练", a:[], en:"Pre-training", cat:"ai",
+   say:"先用海量数据给模型打底子",
+   d:"在大规模通用数据上先训练出基础能力（语言理解、常识等），之后再针对具体任务微调。"},
+  {t:"提示词", a:["prompt","Prompt"], en:"Prompt", cat:"ai",
+   say:"你跟 AI 说的话、给它的指令",
+   d:"用户输入给生成式 AI 的指令或问题。提示词写得好不好，直接影响 AI 输出的质量，这门技巧叫提示工程。"},
+  {t:"词元", a:["token","tokens","Token","Tokens"], en:"Token", cat:"ai",
+   say:"模型读文本时切出来的最小片段",
+   d:"大模型不是按整词处理文字，而是切成一个个 token，可能是一个字、半个词或标点，计费也常按 token 算。"},
+  {t:"词嵌入", a:["嵌入","Embedding","embedding"], en:"Embedding", cat:"ai",
+   say:"把词变成一串数字，让意思相近的词数字也相近",
+   d:"把离散的词映射成一组连续数字（向量），语义相近的词在数字空间里距离也近，方便计算机计算和检索。"},
+  {t:"幻觉", a:[], en:"Hallucination", cat:"ai",
+   say:"AI 一本正经地胡说八道",
+   d:"模型生成看似合理但实际错误、无中生有的内容，比如编造不存在的法条和文献，是大模型的主要风险之一。"},
+  {t:"卷积", a:["convolution"], en:"Convolution", cat:"ai",
+   say:"用一个小窗口在数据上滑动着提取局部特征",
+   d:"卷积核（一个小数字矩阵）在输入数据上按步长滑动，逐块做加权求和，提取边缘、纹理等局部模式。"},
+  {t:"池化", a:["pooling","Pooling"], en:"Pooling", cat:"ai",
+   say:"把一片区域压缩成一个代表值",
+   d:"对相邻的一片输出取最大值或平均值，缩小数据尺寸、减少计算量，同时保留主要特征。"},
+  {t:"全连接层", a:[], en:"Fully Connected Layer", cat:"ai",
+   say:"每个神经元都和下一层所有神经元相连的层",
+   d:"层中每个节点都与下一层每个节点相连，通常放在网络末端，负责把前面提取的特征汇总成最终输出。"},
+  {t:"激活函数", a:[], en:"Activation Function", cat:"ai",
+   say:"给计算结果加「开关或弯折」，让网络能学复杂规律",
+   d:"作用在神经元输出上的非线性函数（如 ReLU、Sigmoid），没有它，再多层网络也只等价于一层线性变换。"},
+  {t:"批量归一化", a:["Batch Normalization","batch normalization","BN"], en:"Batch Normalization", cat:"ai",
+   say:"把每层的数值拉回合适范围，让训练更稳",
+   d:"对每一批数据的中间输出做标准化处理，缓解数值偏移，让训练更快、更稳定，并有轻微正则化效果。"},
+  {t:"梯度消失", a:[], en:"Vanishing Gradient", cat:"ai",
+   say:"错误往回传时越变越小，前面的层干脆学不动",
+   d:"网络太深时，反向传播的梯度逐层相乘后趋近于 0，靠近输入的层参数几乎不更新。"},
+  {t:"梯度爆炸", a:[], en:"Exploding Gradient", cat:"ai",
+   say:"错误往回传时越变越大，数值直接失控",
+   d:"梯度在连乘中变得极大，参数更新过猛，输出变成 NaN 或剧烈震荡，训练直接崩掉。"},
+  {t:"决策树", a:[], en:"Decision Tree", cat:"ai",
+   say:"像一连串选择题一样层层判断、最后给出答案",
+   d:"通过对特征不断做「是/否」划分形成一棵树，从根走到叶子就得到预测结果，直观好解释。"},
+  {t:"随机森林", a:[], en:"Random Forest", cat:"ai",
+   say:"很多棵决策树一起投票决定答案",
+   d:"同时训练很多棵有差异的决策树，最后综合各树的投票，比单棵树更准、更不容易过拟合。"},
+  {t:"K近邻", a:["KNN","knn"], en:"K-Nearest Neighbors", cat:"ai",
+   say:"看离它最近的几个邻居是谁，就跟着算谁",
+   d:"「近朱者赤」：新样本看离它最近的 K 个已知样本多数属于哪类，就判为哪类，本身几乎不需要训练。"},
+  {t:"支持向量机", a:["SVM"], en:"Support Vector Machine", cat:"ai",
+   say:"找一条分界线，把不同类别尽量分得最开",
+   d:"在两类样本之间找一个间隔最大的分隔超平面，小数据场景下效果稳定，是经典的分类算法。"},
+  {t:"K均值聚类", a:["K-means","k-means","Kmeans"], en:"K-Means", cat:"ai",
+   say:"自动把数据分成 K 堆的算法",
+   d:"事先指定簇数 K，算法反复把每个点划给最近的中心、再更新中心，直到分堆稳定。"},
+  {t:"降维", a:[], en:"Dimensionality Reduction", cat:"ai",
+   say:"把太多的信息维度压缩成少数几个",
+   d:"在尽量保留信息的前提下减少特征数量，便于可视化、去冗余和加快计算，代表方法有 PCA。"},
+  {t:"主成分分析", a:["PCA"], en:"Principal Component Analysis", cat:"ai",
+   say:"一种保留主要信息的压缩方法",
+   d:"通过线性变换把高维数据投影到几个最重要的方向上，用更少的维度保留数据绝大部分变化信息。"},
+  {t:"生成对抗网络", a:["GAN"], en:"Generative Adversarial Network", cat:"ai",
+   say:"一个负责造假、一个负责鉴假，俩网络互相较劲一起变强",
+   d:"生成器尽量生成以假乱真的样本，判别器努力分辨真假，两者对抗训练，常用于 AI 画图、换脸。"},
+  {t:"目标检测", a:[], en:"Object Detection", cat:"ai",
+   say:"找出图片里有什么、并用框框出位置",
+   d:"不仅要识别图中物体的类别（人、车、红绿灯），还要标出每个物体的位置框，自动驾驶大量使用。"},
+  {t:"推荐系统", a:[], en:"Recommendation System", cat:"ai",
+   say:"根据你的喜好猜你可能喜欢什么",
+   d:"分析用户历史行为，预测兴趣并推送内容，抖音首页、淘宝猜你喜欢、网易云每日推荐背后都是它。"},
+  {t:"知识图谱", a:[], en:"Knowledge Graph", cat:"ai",
+   say:"用「事物—关系—事物」连成的知识网络",
+   d:"把现实世界的实体和关系组织成网状结构（如「张三—毕业于—北大」），支持问答和推理，搜索引擎很依赖它。"},
+  {t:"损失函数收敛", a:["收敛"], en:"Convergence", cat:"ai",
+   say:"错误分数降到底、不再明显下降，模型学到位了",
+   d:"训练中损失值逐步下降并趋于稳定的状态。若损失一直剧烈震荡，说明模型还没收敛。"},
+
+  /* ---------- 数学基础 ---------- */
+  {t:"向量", a:[], en:"Vector", cat:"math",
+   say:"一排有顺序的数字",
+   d:"把数字按顺序排成一列或一行，如 [1.2, 3.5, 0.8]，可以表示方向、词嵌入、样本特征等。"},
+  {t:"矩阵", a:[], en:"Matrix", cat:"math",
+   say:"数字排成的矩形表格",
+   d:"按行和列排列的数字表格，神经网络的一层计算本质上就是一次矩阵乘法。"},
+  {t:"张量", a:[], en:"Tensor", cat:"math",
+   say:"向量、矩阵的推广——多维数字数组",
+   d:"标量是 0 维张量、向量 1 维、矩阵 2 维，更高维的数组统称张量，TensorFlow、PyTorch 的名字都来自它。"},
+  {t:"标量", a:[], en:"Scalar", cat:"math",
+   say:"一个单独的数字",
+   d:"只有大小、没有方向的数，如温度 36.5、损失值 0.02，是相对于向量而言的概念。"},
+  {t:"概率", a:[], en:"Probability", cat:"math",
+   say:"一件事发生的可能性大小（0 到 1）",
+   d:"取值在 0（不可能）到 1（必然）之间，0.8 就是 80% 的可能性，AI 分类常输出各类的概率。"},
+  {t:"线性代数", a:[], en:"Linear Algebra", cat:"math",
+   say:"研究向量和矩阵怎么运算的数学分支",
+   d:"处理向量、矩阵及其线性变换的数学学科，是理解深度学习计算过程的必备数学基础。"},
+  {t:"导数", a:[], en:"Derivative", cat:"math",
+   say:"一个量随另一个量变化的快慢",
+   d:"描述函数在某一点的瞬时变化率，几何上是曲线在该点切线的斜率，梯度下降就建立在导数上。"},
+  {t:"偏导数", a:[], en:"Partial Derivative", cat:"math",
+   say:"只看某一个因素单独造成的影响",
+   d:"多元函数中只对其中一个变量求导、其他变量视为不变，神经网络里用它算每个参数对损失的影响。"},
+  {t:"正态分布", a:[], en:"Normal Distribution", cat:"math",
+   say:"中间多、两头少的「钟形」数据分布",
+   d:"也叫高斯分布，大量独立因素叠加的数据常呈此分布，如身高、考试成绩、测量误差。"},
+  {t:"期望", a:[], en:"Expectation", cat:"math",
+   say:"大量重复之后结果的平均值",
+   d:"随机变量按概率加权的长期平均值，比如掷骰子点数的期望是 3.5。"},
+  {t:"方差", a:[], en:"Variance", cat:"math",
+   say:"数据围绕平均值散开的程度",
+   d:"衡量数据波动大小：方差大说明数值忽高忽低，方差小说明都挤在平均值附近。"},
+  {t:"标准差", a:[], en:"Standard Deviation", cat:"math",
+   say:"方差开个根号，表示数据波动大小",
+   d:"和原始数据单位相同的波动指标，比方差更直观。标准差越大，数据越分散。"},
+  {t:"归一化", a:[], en:"Normalization", cat:"math",
+   say:"把数据按比例缩放到统一范围（如 0 到 1）",
+   d:"把不同量级的数据拉到同一尺度，避免大数字特征「碾压」小数字特征，加快训练收敛。"},
+  {t:"标准化", a:[], en:"Standardization", cat:"math",
+   say:"把数据变成平均值为 0、波动为 1 的标准形式",
+   d:"减去均值再除以标准差，处理后数据均值为 0、标准差为 1，是常见的数据预处理手段。"},
+  {t:"点积", a:[], en:"Dot Product", cat:"math",
+   say:"两组数字对应相乘再加总，得到一个数",
+   d:"两个向量对应位置相乘后求和，结果能反映它们的相似程度，注意力机制的核心计算就是点积。"},
+
+  /* ---------- 计算机通用 ---------- */
+  {t:"程序", a:["代码","code"], en:"Program / Code", cat:"cs",
+   say:"写给计算机看的一串指令",
+   d:"用编程语言写出来、让计算机按顺序执行的指令集合，平时用的 App、网页都是程序。"},
+  {t:"编程", a:[], en:"Programming", cat:"cs",
+   say:"把人的想法翻译成计算机能懂的指令",
+   d:"用某种编程语言编写程序的过程，本质上是把解决问题的步骤精确地讲给计算机听。"},
+  {t:"变量", a:[], en:"Variable", cat:"cs",
+   say:"程序里装数据的「贴了标签的盒子」",
+   d:"给一块数据起名字存起来，之后通过名字读取或修改，如 score = 95，score 就是变量。"},
+  {t:"函数", a:[], en:"Function", cat:"cs",
+   say:"一段可以反复调用、完成特定功能的代码",
+   d:"把一段完成固定任务的代码打包命名，需要时调用即可，避免重复书写，还能接收参数、返回结果。"},
+  {t:"返回值", a:[], en:"Return Value", cat:"cs",
+   say:"函数干完活后交出来的结果",
+   d:"函数执行结束时通过 return 交还给调用处的数据，调用者可以拿这个结果继续处理。"},
+  {t:"循环", a:["loop"], en:"Loop", cat:"cs",
+   say:"让电脑把一段代码重复执行",
+   d:"控制结构，让某段代码在满足条件时反复执行，常见 for 循环和 while 循环，用来处理重复任务。"},
+  {t:"条件判断", a:[], en:"Conditional Statement", cat:"cs",
+   say:"让电脑根据条件决定走哪条路",
+   d:"用 if / else 让程序判断条件真假，从而执行不同分支，比如「分数≥60 显示及格，否则显示不及格」。"},
+  {t:"数组", a:[], en:"Array", cat:"cs",
+   say:"一排按顺序编号的格子",
+   d:"把多个同类型数据排成有序序列，用下标（从 0 开始）快速存取，如 scores[0] 取第一个成绩。"},
+  {t:"指针", a:[], en:"Pointer", cat:"cs",
+   say:"存着另一个数据「门牌号（内存地址）」的变量",
+   d:"指针里存的不是数据本身，而是数据在内存中的地址，通过它可以间接找到和修改那个数据，C 语言的核心概念。"},
+  {t:"数据结构", a:[], en:"Data Structure", cat:"cs",
+   say:"数据在电脑里的组织和存放方式",
+   d:"研究数据怎么存、怎么组织才能又省空间又快，常见有数组、链表、栈、队列、树、图、哈希表。"},
+  {t:"链表", a:[], en:"Linked List", cat:"cs",
+   say:"每个节点挂着下一个节点的一条链",
+   d:"数据存放在一个个节点里，每个节点除数据外还存着下一个节点的地址，增删灵活但不支持按下标秒查。"},
+  {t:"栈", a:[], en:"Stack", cat:"cs",
+   say:"后进先出的一摞盒子",
+   d:"只能在顶端存取的结构：最后放进去的最先拿出来（LIFO）。函数调用、浏览器返回、撤销操作都用栈。"},
+  {t:"队列", a:[], en:"Queue", cat:"cs",
+   say:"先进先出的排队队伍",
+   d:"一端进、另一端出的结构：先来的先服务（FIFO），如打印任务排队、消息队列。"},
+  {t:"哈希表", a:["散列表"], en:"Hash Table", cat:"cs",
+   say:"根据「关键字」几乎秒查内容的表",
+   d:"通过哈希函数把键映射到存储位置，用键找值平均接近 O(1)，Python 的 dict、Redis 底层都依赖它。"},
+  {t:"树形结构", a:["树结构"], en:"Tree", cat:"cs",
+   say:"像家谱一样一层层分叉的数据结构",
+   d:"由节点和边组成的层次结构，最上面叫根，往下分叉，文件目录、数据库索引、决策树都是树。"},
+  {t:"图结构", a:[], en:"Graph", cat:"cs",
+   say:"点和连线组成的关系网",
+   d:"由顶点和边构成，用来表示「谁和谁有关系」，如社交网络、地图道路、课程先修关系。"},
+  {t:"时间复杂度", a:[], en:"Time Complexity", cat:"cs",
+   say:"数据变多时，算法耗时增长得多快",
+   d:"用大 O 表示法（如 O(n)、O(log n)）描述输入规模增大时运行时间的增长趋势，是算法效率的核心指标。"},
+  {t:"空间复杂度", a:[], en:"Space Complexity", cat:"cs",
+   say:"算法需要多少额外存储空间",
+   d:"衡量输入规模增大时算法占用内存的增长趋势，常和时间复杂度做「拿空间换时间」的权衡。"},
+  {t:"递归", a:[], en:"Recursion", cat:"cs",
+   say:"函数自己调用自己来解决问题",
+   d:"把大问题化成同类的小问题，函数不断调用自身直到碰到「终止条件」，如算阶乘、遍历文件夹。"},
+  {t:"编译", a:[], en:"Compile", cat:"cs",
+   say:"把人写的代码整体翻译成机器能执行的指令",
+   d:"编译器一次性把源代码翻译成机器码生成可执行文件，C、Java 都属于需要编译（或半编译）的语言。"},
+  {t:"编译器", a:[], en:"Compiler", cat:"cs",
+   say:"负责把源代码翻译成机器指令的工具",
+   d:"把高级语言整体翻译成机器语言的程序，翻译过程中还会做语法检查和优化。"},
+  {t:"解释器", a:[], en:"Interpreter", cat:"cs",
+   say:"不提前翻译，边读代码边执行",
+   d:"不生成整个可执行文件，而是逐行读取、逐行执行源代码，Python、JavaScript 主要靠解释器运行。"},
+  {t:"调试", a:["debug","Debug"], en:"Debug", cat:"cs",
+   say:"找程序里的错误并修好",
+   d:"程序结果不对时，通过打断点、单步运行、查看变量等手段定位原因并修复的过程。"},
+  {t:"程序缺陷", a:["bug","Bug","bugs"], en:"Bug", cat:"cs",
+   say:"程序里的错误或毛病",
+   d:"程序中导致结果错误、崩溃或异常行为的缺陷，可能是写错代码、考虑不周或设计问题。"},
+  {t:"断点", a:[], en:"Breakpoint", cat:"cs",
+   say:"调试时让程序自动停住的某一行",
+   d:"在代码某行设置标记，程序运行到这里会暂停，方便查看当时的变量值和调用过程。"},
+  {t:"操作系统", a:["OS"], en:"Operating System", cat:"cs",
+   say:"管理整台电脑软硬件的大管家",
+   d:"管理 CPU、内存、文件和外设的基础软件，所有程序都运行在它之上，如 Windows、macOS、Linux。"},
+  {t:"进程", a:[], en:"Process", cat:"cs",
+   say:"一个正在运行的程序",
+   d:"程序一旦被启动就成为进程，拥有自己独立的内存空间，关闭程序就是结束进程。"},
+  {t:"线程", a:[], en:"Thread", cat:"cs",
+   say:"进程里实际干活的一条小流水线",
+   d:"进程内的最小执行单位，同一个进程可以有多个线程共享内存、同时干不同的活，让程序更快或不卡顿。"},
+  {t:"并发", a:[], en:"Concurrency", cat:"cs",
+   say:"多个任务交替着推进，看起来像同时进行",
+   d:"单核 CPU 通过快速切换任务实现「宏观同时、微观交替」，重点在于处理多任务的结构。"},
+  {t:"并行", a:[], en:"Parallelism", cat:"cs",
+   say:"多个任务真的在同一时刻一起执行",
+   d:"需要多核或多台硬件，多个计算物理上同时发生，GPU 有成千上万个核心，特别适合并行。"},
+  {t:"中央处理器", a:["CPU"], en:"Central Processing Unit", cat:"cs",
+   say:"计算机的「通用大脑」",
+   d:"负责解释指令、完成通用逻辑计算的芯片，核心数和主频决定它的通用算力。"},
+  {t:"图形处理器", a:["GPU"], en:"Graphics Processing Unit", cat:"cs",
+   say:"显卡芯片，特别适合批量算数，训练 AI 全靠它",
+   d:"集成大量小核心，擅长同时做矩阵乘法等重复计算，训练神经网络比 CPU 快几十上百倍。"},
+  {t:"内存", a:[], en:"Memory / RAM", cat:"cs",
+   say:"程序运行时临时使用的高速工作台，断电就清空",
+   d:"运行中的程序和数据临时放在内存里供 CPU 高速读写，容量小、速度快、断电丢失。"},
+  {t:"硬盘", a:[], en:"Hard Disk / SSD", cat:"cs",
+   say:"长期存放文件的仓库，断电也不丢",
+   d:"持久化存储设备，系统、照片、代码都存这里，速度比内存慢但容量大、断电不丢数据。"},
+  {t:"二进制", a:[], en:"Binary", cat:"cs",
+   say:"只用 0 和 1 来表示一切数据",
+   d:"计算机底层只认识 0 和 1（对应电路的关和开），数字、文字、图片最终都是二进制。"},
+  {t:"比特", a:["bit"], en:"Bit", cat:"cs",
+   say:"最小的信息单位（0 或 1）",
+   d:"binary digit 的缩写，表示一个 0 或 1，是信息计量的最小单位。"},
+  {t:"字节", a:["byte"], en:"Byte", cat:"cs",
+   say:"8 个比特组成一个字节",
+   d:"通常 1 byte = 8 bit，一个英文字母约占 1 字节，一个汉字常见占 3 字节（UTF-8）。"},
+  {t:"编码", a:[], en:"Encoding", cat:"cs",
+   say:"字符和数字之间互相转换的规则",
+   d:"规定文字怎么用二进制表示，常见 UTF-8、GBK；编码不一致就会出现乱码。"},
+  {t:"字符串", a:["string","String"], en:"String", cat:"cs",
+   say:"程序里的一段文本",
+   d:"由若干字符组成的序列，如 \"你好世界\"，用引号括起来，是编程中最常用的数据类型之一。"},
+  {t:"面向对象", a:["OOP"], en:"Object-Oriented Programming", cat:"cs",
+   say:"把数据和操作它的方法打包成「对象」来写程序",
+   d:"一种编程思想，把现实事物抽象成对象，三大特征是封装、继承、多态，Java、C++、Python 都支持。"},
+  {t:"类", a:["class","Class"], en:"Class", cat:"cs",
+   say:"对象的设计图纸",
+   d:"类定义了一类事物有哪些属性（数据）和方法（行为），比如「学生」类规定有姓名、学号和选课方法。"},
+  {t:"对象", a:["object","Object"], en:"Object", cat:"cs",
+   say:"按图纸（类）造出来的具体成品",
+   d:"类的具体实例，比如按「学生」类造出的学生「张三」就是一个对象，有自己具体的属性值。"},
+  {t:"实例", a:["instance","Instance"], en:"Instance", cat:"cs",
+   say:"对象的另一种叫法",
+   d:"「对象」和「实例」基本同义，强调它是某个类的一个具体存在。"},
+  {t:"实例化", a:[], en:"Instantiation", cat:"cs",
+   say:"按图纸造出一个具体对象的过程",
+   d:"用类创建对象的动作，如 Student(\"张三\") 就是把学生类实例化成张三这个对象。"},
+  {t:"继承", a:[], en:"Inheritance", cat:"cs",
+   say:"子类白拿父类已有的属性和方法",
+   d:"子类自动拥有父类的全部功能，还能添加自己的功能，实现代码复用，如「大学生」继承「学生」。"},
+  {t:"封装", a:[], en:"Encapsulation", cat:"cs",
+   say:"把内部数据和操作包起来，只露出必要的接口",
+   d:"隐藏对象内部实现细节、对外提供受控访问，像自动取款机只给你按钮，不让你碰内部线路。"},
+  {t:"多态", a:[], en:"Polymorphism", cat:"cs",
+   say:"同一个指令，不同对象有不同的反应",
+   d:"同一个方法名作用在不同对象上表现不同，如对「圆」和「矩形」都喊「算面积」，各自用各自的公式。"},
+  {t:"接口", a:["interface","Interface"], en:"Interface", cat:"cs",
+   say:"不同部件之间事先约定好的对接方式",
+   d:"只规定「能调用什么」，不规定内部怎么做，只要按接口约定对接，双方内部怎么改都不影响对方。"},
+  {t:"应用程序接口", a:["API","api"], en:"Application Programming Interface", cat:"cs",
+   say:"别人写好的功能，按约定就能直接调用",
+   d:"软件之间互相调用功能的约定和入口，比如天气 App 直接调用气象局的 API 拿数据，不用自己建气象站。"},
+  {t:"数据库", a:[], en:"Database", cat:"cs",
+   say:"有组织地存放大量数据的仓库",
+   d:"按一定结构长期存储和管理数据的系统，支持增删改查，常见 MySQL、SQLite、MongoDB。"},
+  {t:"服务器", a:[], en:"Server", cat:"cs",
+   say:"在网络上提供服务和数据的电脑",
+   d:"7×24 小时运行、等待客户端来请求的高性能计算机或程序，网页、游戏、网课背后都有服务器。"},
+  {t:"客户端", a:["client"], en:"Client", cat:"cs",
+   say:"用户这一端直接使用的程序",
+   d:"向服务器发起请求、把结果展示给用户的一端，浏览器、手机 App、微信都是客户端。"},
+  {t:"协议", a:[], en:"Protocol", cat:"cs",
+   say:"网络通信双方都遵守的约定",
+   d:"规定数据格式和交互顺序的「共同语言」，双方都按协议来才能互相听懂，如 HTTP、TCP。"},
+  {t:"超文本传输协议", a:["HTTP","http"], en:"HyperText Transfer Protocol", cat:"cs",
+   say:"浏览器和服务器之间传网页内容的规矩",
+   d:"定义了浏览器怎么请求、服务器怎么回应的应用层协议，平时网址开头的 http:// 就是它。"},
+  {t:"安全超文本传输协议", a:["HTTPS","https"], en:"HTTP Secure", cat:"cs",
+   say:"加了密、更安全的 HTTP",
+   d:"在 HTTP 基础上加了加密层，传输内容被截获也看不懂，登录、支付类网站都应使用。"},
+  {t:"IP地址", a:["IP"], en:"IP Address", cat:"cs",
+   say:"网络中每台设备的门牌号",
+   d:"设备接入网络后的数字地址（如 192.168.1.10），数据靠它找到对应的设备。"},
+  {t:"域名", a:[], en:"Domain Name", cat:"cs",
+   say:"网站的名字（如 baidu.com）",
+   d:"为了好记给 IP 地址起的文字名字，由 DNS 负责把域名翻译成真实 IP 地址。"},
+  {t:"路由器", a:[], en:"Router", cat:"cs",
+   say:"负责在网络之间转发数据包的设备",
+   d:"连接不同网络、根据 IP 地址选择最佳路径转发数据的设备，宿舍里那个盒子就是家用路由器。"},
+  {t:"局域网", a:["LAN"], en:"Local Area Network", cat:"cs",
+   say:"小范围内连成的网络（如家里、宿舍、机房）",
+   d:"在有限地理范围内部署的网络，速度快、延迟低，多个局域网通过路由器连成互联网。"},
+  {t:"云计算", a:[], en:"Cloud Computing", cat:"cs",
+   say:"通过网络租用远处机房的算力和存储",
+   d:"像用水用电一样按需使用数据中心的服务器资源，不用自己买机器，常见阿里云、腾讯云、AWS。"},
+  {t:"分布式", a:[], en:"Distributed System", cat:"cs",
+   say:"把一个大任务拆给多台电脑一起干",
+   d:"多台机器通过网络协同完成同一任务，可处理单机扛不住的数据量和流量，如大数据集群。"},
+  {t:"集群", a:[], en:"Cluster", cat:"cs",
+   say:"多台电脑组成一组协同工作",
+   d:"多台服务器当作一个整体对外提供服务，一台坏了其他顶上，提高性能和可靠性。"},
+  {t:"虚拟机", a:["VM"], en:"Virtual Machine", cat:"cs",
+   say:"用软件模拟出来的一台「假电脑」",
+   d:"在一台物理机上虚拟出多台互相隔离的完整电脑，各自装系统、跑程序，互不干扰。"},
+  {t:"容器", a:["container","Container","Docker","docker"], en:"Container", cat:"cs",
+   say:"把应用连同运行环境打包，搬到哪都能直接跑",
+   d:"比虚拟机更轻量的隔离技术，把代码和依赖装进标准箱子，「一次打包、到处运行」，Docker 是代表。"},
+  {t:"开源", a:[], en:"Open Source", cat:"cs",
+   say:"源代码公开，谁都能查看和改进",
+   d:"软件的源代码公开，允许任何人学习、修改、再分发，Linux、Python、PyTorch 都是开源项目。"},
+  {t:"前端", a:[], en:"Frontend", cat:"cs",
+   say:"用户直接看到、点得到的界面部分",
+   d:"负责页面展示和交互，技术栈主要是 HTML、CSS、JavaScript，让界面好看好用。"},
+  {t:"后端", a:[], en:"Backend", cat:"cs",
+   say:"界面背后处理数据和逻辑的部分",
+   d:"运行在服务器上，负责业务逻辑、数据库读写、接口等用户看不见的工作，Java、Python、Go 常用。"},
+  {t:"缓存", a:["cache","Cache"], en:"Cache", cat:"cs",
+   say:"把常用数据放在手边，用的时候直接取",
+   d:"把访问频繁的数据存在更快的介质里，避免重复计算和查询，浏览器缓存、Redis 都是典型。"},
+  {t:"带宽", a:[], en:"Bandwidth", cat:"cs",
+   say:"网络单位时间内能传输的数据量",
+   d:"相当于水管的粗细，带宽越大同一时刻能传的数据越多，看高清视频越不卡。"},
+  {t:"延迟", a:[], en:"Latency", cat:"cs",
+   say:"数据从这头到那头花费的时间",
+   d:"请求发出到收到响应之间的等待时间，打游戏时的「ping 值」就是网络延迟，越低越好。"},
+  {t:"机器学习框架", a:["框架"], en:"Framework", cat:"cs",
+   say:"帮你搭模型的现成工具包",
+   d:"封装好网络层、自动求导等常用功能的开发平台，不用从零造轮子，代表 PyTorch、TensorFlow。"},
+  {t:"版本控制", a:[], en:"Version Control", cat:"cs",
+   say:"记录代码每次改动、随时可回退的管理方式",
+   d:"跟踪文件修改历史、支持多人协作和版本回退，写错了能退回去，Git 是事实标准。"},
+  {t:"Git", a:["git"], en:"Git", cat:"cs",
+   say:"程序员管理代码版本的标配工具",
+   d:"最流行的分布式版本控制系统，记录每次提交，配合 GitHub/Gitee 等平台协作开发。"},
+  {t:"脚本", a:["script"], en:"Script", cat:"cs",
+   say:"写完就能直接运行的简短程序文件",
+   d:"通常由解释器直接执行的小程序，用来自动化处理重复任务，如 Python 脚本、Shell 脚本。"},
+  {t:"命令行", a:["CLI"], en:"Command Line Interface", cat:"cs",
+   say:"靠打字下命令来操作电脑",
+   d:"不用鼠标点图标，直接输入文字指令与计算机交互，高手批量处理任务的主要方式。"},
+  {t:"环境变量", a:[], en:"Environment Variable", cat:"cs",
+   say:"系统层面给程序用的配置信息",
+   d:"在操作系统中设置的一组「名字=值」，所有程序都能读取，常用来配置路径、密钥等。"},
+  {t:"部署", a:["deploy","Deploy"], en:"Deployment", cat:"cs",
+   say:"把程序装到服务器上、真正跑起来给人用",
+   d:"开发完成后把程序发布到运行环境并启动，让用户能实际访问，写完代码离上线还差部署这一步。"},
+  {t:"内存溢出", a:[], en:"Overflow", cat:"cs",
+   say:"数据超出了容器能装的范围",
+   d:"写入的数据超过分配空间，多余部分可能覆盖别的内存导致崩溃或安全漏洞。"},
+  {t:"内存泄漏", a:[], en:"Memory Leak", cat:"cs",
+   say:"程序占着内存不还，越跑越卡",
+   d:"申请的内存用完后没有释放，长期运行占用越来越大，最终程序变慢甚至崩溃。"},
+  {t:"死锁", a:[], en:"Deadlock", cat:"cs",
+   say:"两个任务互相等对方，结果谁都走不了",
+   d:"多线程中 A 拿着资源等 B 松手、B 也拿着资源等 A 松手，双方永久僵持。"},
+  {t:"内核", a:[], en:"Kernel", cat:"cs",
+   say:"操作系统最核心的部分",
+   d:"操作系统中直接管理硬件、进程和内存的核心层，其他功能都建立在内核提供的服务上。"},
+  {t:"终端", a:["terminal","Terminal"], en:"Terminal", cat:"cs",
+   say:"输入命令的那个黑框框",
+   d:"输入和显示文字命令的程序，命令行工具的「门面」，程序员天天打交道的界面。"},
+  {t:"依赖", a:["dependency"], en:"Dependency", cat:"cs",
+   say:"程序运行需要借用的别人写好的代码包",
+   d:"现代程序会引用大量现成的库，这些库就是依赖；依赖缺失或版本不对，程序就跑不起来。"}
+];
+
+/* ========== 例句 ========== */
+const EXAMPLES = [
+  "卷积神经网络通过反向传播算法不断优化模型参数，从而提升图像分类任务的准确率。",
+  "大语言模型在推理阶段会把输入文本切分成多个 Token，再通过注意力机制计算上下文之间的关联。",
+  "当学习率设置过大时，损失函数容易出现震荡，导致模型过拟合，泛化能力明显下降。"
+];
+
+const CAT_NAME = {ai:"人工智能", math:"数学基础", cs:"计算机通用"};
+
+/* ========== 构建匹配模式（长的优先） ========== */
+const PATTERNS = [];
+GLOSSARY.forEach(e=>{
+  PATTERNS.push({s:e.t, entry:e, ascii:/^[\x00-\x7F]+$/.test(e.t)});
+  (e.a||[]).forEach(a=>PATTERNS.push({s:a, entry:e, ascii:/^[\x00-\x7F]+$/.test(a)}));
+});
+PATTERNS.sort((x,y)=>y.s.length - x.s.length);
+
+function isAsciiAlnum(ch){ return ch && /[A-Za-z0-9_]/.test(ch); }
+
+function findMatches(text){
+  const lower = text.toLowerCase();
+  const occupied = new Uint8Array(text.length);
+  const matches = [];
+  for(const p of PATTERNS){
+    const key = p.s.toLowerCase();
+    let idx = 0;
+    while((idx = lower.indexOf(key, idx)) !== -1){
+      const end = idx + key.length;
+      let ok = true;
+      if(p.ascii){
+        if(isAsciiAlnum(text[idx-1]) || isAsciiAlnum(text[end])) ok = false;
+      }
+      if(ok){
+        for(let k=idx;k<end;k++){ if(occupied[k]){ok=false;break;} }
+      }
+      if(ok){
+        for(let k=idx;k<end;k++) occupied[k]=1;
+        matches.push({start:idx, end:end, entry:p.entry, matched:text.slice(idx,end)});
+      }
+      idx = end;
+    }
+  }
+  matches.sort((a,b)=>a.start-b.start);
+  return matches;
+}
+
+/* ========== 渲染翻译结果 ========== */
+function esc(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+let lastPlainText = "";
+
+function renderResult(){
+  const text = document.getElementById("input").value.trim();
+  if(!text){ showToast("先把句子贴进来哦"); return; }
+
+  const matches = findMatches(text);
+  const resultArea = document.getElementById("resultArea");
+  const welcomeCard = document.getElementById("welcomeCard");
+  resultArea.classList.remove("hide");
+  welcomeCard.classList.add("hide");
+
+  // 原句高亮
+  let origHtml = esc(text);
+  for(let i=matches.length-1;i>=0;i--){
+    const m = matches[i];
+    origHtml = origHtml.slice(0,m.start) + "<mark>"+esc(text.slice(m.start,m.end))+"</mark>" + origHtml.slice(m.end);
+  }
+  document.getElementById("origOut").innerHTML = origHtml;
+
+  // 大白话
+  let plainHtml = "", plainText = "", cursor = 0;
+  matches.forEach(m=>{
+    plainHtml += esc(text.slice(cursor,m.start));
+    plainText += text.slice(cursor,m.start);
+    const rp = `<span class="bracket">「</span><span class="rp" title="${esc(m.entry.t)}：${esc(m.entry.say)}">${esc(m.entry.say)}</span><span class="bracket">」</span>`;
+    plainHtml += rp;
+    plainText += "「"+m.entry.say+"」";
+    cursor = m.end;
+  });
+  plainHtml += esc(text.slice(cursor));
+  plainText += text.slice(cursor);
+  lastPlainText = plainText;
+
+  if(matches.length===0){
+    plainHtml = `这句话里没检测到词库收录的专业词 🤔<br>可能它本来就挺白话，或者词库里还没这个词——<b>把整句发给你的 Agent，可以补充新词</b>。`;
+    lastPlainText = plainText;
+  }
+  document.getElementById("plainOut").innerHTML = plainHtml;
+
+  // 名词卡片（去重，保持出现顺序）
+  const seen = new Set();
+  const cards = [];
+  matches.forEach(m=>{
+    if(!seen.has(m.entry)){ seen.add(m.entry); cards.push(m); }
+  });
+  document.getElementById("termNum").textContent = cards.length + " 个";
+  document.getElementById("termCards").innerHTML = cards.map(m=>`
+    <div class="term-card">
+      <div class="term-head">
+        <span class="term-name">${esc(m.entry.t)}</span>
+        <span class="term-en">${esc(m.entry.en)}</span>
+        <span class="badge b-${m.entry.cat}">${CAT_NAME[m.entry.cat]}</span>
+      </div>
+      <div class="term-desc">${esc(m.entry.d)}</div>
+    </div>`).join("") || `<div class="empty" style="grid-column:1/-1">没有检测到专业名词</div>`;
+}
+
+/* ========== 词库视图 ========== */
+let glossCat = "all";
+function renderGloss(){
+  const kw = document.getElementById("glossSearch").value.trim().toLowerCase();
+  const list = GLOSSARY.filter(e=>{
+    if(glossCat!=="all" && e.cat!==glossCat) return false;
+    if(!kw) return true;
+    const hay = (e.t+" "+e.en+" "+e.d+" "+(e.a||[]).join(" ")).toLowerCase();
+    return hay.indexOf(kw) !== -1;
+  });
+  document.getElementById("glossCount").textContent =
+    `共收录 ${GLOSSARY.length} 个术语，当前显示 ${list.length} 个`;
+  document.getElementById("glossList").innerHTML = list.map(e=>`
+    <div class="term-card">
+      <div class="term-head">
+        <span class="term-name">${esc(e.t)}</span>
+        <span class="term-en">${esc(e.en)}</span>
+        <span class="badge b-${e.cat}">${CAT_NAME[e.cat]}</span>
+      </div>
+      <div class="term-desc">${esc(e.d)}</div>
+    </div>`).join("") || `<div class="empty" style="grid-column:1/-1">没搜到这个词，发给 Agent 补充进词库吧</div>`;
+}
+
+/* ========== 交互绑定 ========== */
+const input = document.getElementById("input");
+input.addEventListener("input",()=>{
+  document.getElementById("charCount").textContent = input.value.length + " 字";
+});
+input.addEventListener("keydown",e=>{
+  if((e.ctrl||e.meta) && e.key==="Enter") renderResult();
+});
+document.getElementById("goBtn").addEventListener("click",renderResult);
+document.getElementById("clearBtn").addEventListener("click",()=>{
+  input.value="";
+  document.getElementById("charCount").textContent="0 字";
+  document.getElementById("resultArea").classList.add("hide");
+  document.getElementById("welcomeCard").classList.remove("hide");
+  input.focus();
+});
+document.getElementById("copyBtn").addEventListener("click",()=>{
+  if(!lastPlainText) return;
+  navigator.clipboard.writeText(lastPlainText).then(()=>showToast("已复制大白话 ✅"))
+    .catch(()=>showToast("复制失败，可手动选择复制"));
+});
+document.querySelectorAll(".chip").forEach(c=>{
+  c.addEventListener("click",()=>{
+    input.value = EXAMPLES[+c.dataset.ex];
+    document.getElementById("charCount").textContent = input.value.length+" 字";
+    renderResult();
+  });
+});
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    const isT = t.dataset.view==="translator";
+    document.getElementById("view-translator").classList.toggle("hide",!isT);
+    document.getElementById("view-glossary").classList.toggle("hide",isT);
+    if(!isT) renderGloss();
+  });
+});
+document.querySelectorAll(".filter").forEach(f=>{
+  f.addEventListener("click",()=>{
+    document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+    f.classList.add("active");
+    glossCat = f.dataset.cat;
+    renderGloss();
+  });
+});
+document.getElementById("glossSearch").addEventListener("input",renderGloss);
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove("show"),1800);
+}
+
+renderGloss();
+</script>
+</body>
+</html>
